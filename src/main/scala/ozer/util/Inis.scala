@@ -2,16 +2,22 @@ package ozer.util
 
 import java.util.{Map => JMap}
 import java.io.File
-import org.ini4j.{Ini => JIni, Wini}
+import org.ini4j.{Ini => JIni, Wini, MultiMap}
 import scala.collection.JavaConverters._
 
 object Inis {
-  type Sections = Map[String, String]
+  type Sections = Map[String, List[String]]
   type Ini = Map[String, Sections]
 
   private[this] def toIni(jIni: JIni): Ini = {
-    jIni.asScala.toMap.map {
-      case (key, value) => (key, value.asScala.toMap)
+    val mapOfSections = jIni.asScala.toMap
+
+    mapOfSections.map { case (sectionName, iniSection) => 
+      val keySet = iniSection.keySet.asScala
+      val listOfTuples: List[(String, List[String])] = for (key <- keySet.toList) yield {
+        (key, iniSection.getAll(key).asScala.toList)
+      }
+      (sectionName, Map(listOfTuples: _*))
     }
   }
 
@@ -21,8 +27,12 @@ object Inis {
   }
 
   def fromFile(file: File): Ini = {
-    val jIni = new JIni(file)
-    toIni(jIni)
+    try {
+      val jIni = new JIni(file)
+      toIni(jIni)
+    } catch {
+      case _ => Map.empty
+    }
   }
 
   def toFile(ini: Ini, fileName: String): Unit = {
@@ -30,13 +40,22 @@ object Inis {
   }
 
   def toFile(ini: Ini, file: File): Unit = {
-    val wini = new Wini(file)
+    val jIni = new JIni(file)
+    jIni.clear()
 
     for {
       (sectionName, properites) <- ini
-      (key, value) <- properites
-    } wini.put(sectionName, key, value)
+      (key, values) <- properites
+      value <- values
+    } {
+      ///println(sectionName + ":" + value)
+      val sectionOpt: Option[MultiMap[String, String]] = Option(jIni.get(sectionName))
+      sectionOpt match {
+        case Some(section) => section.add(key, value)
+        case None =>          jIni.put(sectionName, key, value)
+      }
+    }
 
-    wini.store
+    jIni.store
   }
 }

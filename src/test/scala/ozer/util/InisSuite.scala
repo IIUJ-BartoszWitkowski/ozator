@@ -9,13 +9,13 @@ class InisSuite extends FunSuite {
   import Inis._ 
 
   test("Highlevel integration test") {
-    val givenIni = Map(
+    val givenIni: Ini = Map(
       "section1" -> Map(
-        "property1" -> "value1",
-        "property2" -> "value2"),
+        "property1" -> List("value1"),
+        "property2" -> List("value2")),
       "section2" -> Map(
-        "property3" -> "value3",
-        "property4" -> "value4"))
+        "property3" -> List("value3"),
+        "property4" -> List("value4", "value5")))
 
     val fileName = "test.ini"
 
@@ -23,7 +23,7 @@ class InisSuite extends FunSuite {
 
     val readIni = Inis.fromFile(fileName)
 
-    println(readIni)
+    //println(readIni)
     assert(givenIni == readIni)
   }
 }
