@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+
+JAR=ozer_2.9.2-0.0.1-one-jar.jar
+
+function die() {
+    echo "$*" 1>&2
+    exit 1
+}
+
+
+DIR=`dirname $BASH_SOURCE`
+BASE=`basename $0`
+
+test -x "$DIR/$BASE" || die "\"$DIR/$BASE\" not found, this script must be run from the project base directory"
+
+exec java $JAVA_OPTS -jar "${DIR}/${JAR}" "$@"
