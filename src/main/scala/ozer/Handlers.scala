@@ -18,12 +18,60 @@ trait ScreenHandler {
 trait FilesystemHandler {
   def homeDir: File
   def fileFromHome(name: String): File
+  def exists(path: String): Boolean
+  def isSymlink(path: String): Boolean
+  def areSame(left: String, right: String): Boolean
 }
 
-
 object UnpureHandlers {
+  trait LinuxSymlinks {
+    import sys.process._ 
+    type SanitizedPath = Option[String]
+    type CorrectPath = Some[String]
+
+    private[this] def testSeq(params: Seq[String]): Boolean = {
+      val returnValue = ("test" +: params).!
+      returnValue == 0
+    }
+
+    private[this] def test(params: String*): Boolean = {
+      testSeq(params)
+    }
+
+    private[this] def isSymlink(path: SanitizedPath): Boolean = {
+      if (path.isDefined) {
+        test("-h", path.get)
+      } else {
+        false
+      }
+    }
+
+    def isSymlink(path: String): Boolean = {
+      isSymlink(sanitize(path))  
+    }
+
+    private[this] def areSame(left: SanitizedPath, right: SanitizedPath) = {
+      if (left.isDefined && right.isDefined) {
+        test(left.get, "-ef", right.get)
+      } else {
+        false
+      }
+    }
+
+    def areSame(left: String, right: String): Boolean = {
+      areSame(sanitize(left), sanitize(right))
+    }
+
+    def sanitize(path: String): SanitizedPath = {
+      val file = new File(path)
+      if (file.exists) Some(file.getAbsolutePath)
+      else             None
+    }
+  }
+
   object UnpureFilesystemHandler 
     extends FilesystemHandler 
+    with LinuxSymlinks 
     with Globals {
   
     override def homeDir = {
@@ -31,6 +79,9 @@ object UnpureHandlers {
       if (!dir.exists) dir.mkdirs
       dir 
     }
+    
+    override def exists(path: String) = new File(path).exists
+    
     override def fileFromHome(name: String) = new File(homeDir, name)
   }
 
