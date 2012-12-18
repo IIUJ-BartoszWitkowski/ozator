@@ -1,15 +1,14 @@
 package ozer
 
 import ozer.parsing._
+import ozer.handlers._
 
 trait Interpret {
   def sourceHandler: SourceHandler
   def screenHandler: ScreenHandler
   
   def listSources: Unit = {
-    sourceHandler.list.foreach { source =>
-      screenHandler.println(source)
-    }
+    sourceHandler.list   
   }
 
   def handleError(message: String): Unit = {

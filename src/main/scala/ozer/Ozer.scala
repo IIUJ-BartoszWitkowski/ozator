@@ -9,10 +9,11 @@ trait Log {
 
 object Ozer extends Log {
   val interpret: Interpret = new Interpret {
-    import ozer.UnpureHandlers._ 
+    import ozer.handlers._ 
+    import ozer.handlers.UnpureHandlers._ 
 
-      override val sourceHandler = new IniSourceHandler(UnpureFilesystemHandler)
-      override val screenHandler = UnpureScreenHandler
+    override lazy val sourceHandler = new IniSourceHandler(UnpureFilesystemHandler, screenHandler)
+    override lazy val screenHandler = UnpureScreenHandler
   }
 
   def main(args: Array[String]) {
