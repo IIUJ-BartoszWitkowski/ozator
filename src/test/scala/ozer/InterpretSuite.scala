@@ -5,6 +5,7 @@ import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 
 import ozer.parsing._
+import ozer.handlers._
 
 @RunWith(classOf[JUnitRunner])
 class InterpretSuite extends FunSuite {
@@ -58,25 +59,6 @@ class InterpretSuite extends FunSuite {
 
   object MockScreenHandler {
     def empty: MockScreenHandler = new MockScreenHandler
-  }
-
-  test("source list") {
-    def check(given: List[String]) = {
-      val mockSourceHandler = MockSourceHandler(given)
-      val mockScreenHandler = MockScreenHandler.empty
-      
-      val interpret = new Interpret {
-        override val sourceHandler = mockSourceHandler
-        override val screenHandler = mockScreenHandler
-      }
-
-      interpret(Source.List)
-      
-      assert(mockScreenHandler.messages == given)
-    }
-
-    check(List("dir1", "dir2"))
-    check(List.empty[String])
   }
 
   test("source add") {
