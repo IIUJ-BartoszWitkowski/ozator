@@ -6,9 +6,10 @@ import ozer.handlers._
 trait Interpret {
   def sourceHandler: SourceHandler
   def screenHandler: ScreenHandler
+  def dbHandler:     DbHandler
   
   def listSources: Unit = {
-    sourceHandler.list   
+    sourceHandler.printList   
   }
 
   def handleError(message: String): Unit = {
@@ -23,6 +24,18 @@ trait Interpret {
     sourceHandler.remove(files)
   }
 
+  def createDb(dir: String) = {
+    dbHandler.create(dir)
+  }
+
+  def updateDb() = {
+    dbHandler.update
+  }
+
+  def dbStatus() = {
+    dbHandler.status
+  }
+
   def unsupported(command: Command) = {
     screenHandler.println(command.toString + " not supported yet")
   }
@@ -32,6 +45,9 @@ trait Interpret {
     case Source.List       => listSources
     case Source.Add(files) => addSources(files)
     case Source.Rm(files)  => removeSources(files)
+    case Db.Create(dir)    => createDb(dir)
+    case Db.Update         => updateDb()
+    case Db.Status         => dbStatus()
     case cmd               => unsupported(cmd)
   }
 }

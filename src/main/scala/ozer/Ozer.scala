@@ -3,7 +3,7 @@ package ozer
 import ozer.parsing.Parse
 
 trait Log {
-  val DEBUG = true
+  val DEBUG = false
   def debug(str: String) = if (DEBUG) println(str)
 }
 
@@ -14,6 +14,7 @@ object Ozer extends Log {
 
     override lazy val sourceHandler = new IniSourceHandler(UnpureFilesystemHandler, screenHandler)
     override lazy val screenHandler = UnpureScreenHandler
+    override lazy val dbHandler = new DbHandlerImpl(sourceHandler, screenHandler, UnpureFilesystemHandler)
   }
 
   def main(args: Array[String]) {

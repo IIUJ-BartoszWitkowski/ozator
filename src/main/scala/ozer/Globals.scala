@@ -20,7 +20,7 @@ trait Globals {
     val ozerDir = "ozer"
     os match {
       case Linux =>    System.getProperty("user.home") + File.separator + "." + ozerDir
-      case Windows =>  System.getProperty("user.home") + File.separator       + ozerDir
+      case Windows =>  osNotSupported // System.getProperty("user.home") + File.separator       + ozerDir
       case Other =>    osNotSupported
     }
   }
@@ -29,6 +29,8 @@ trait Globals {
     lazy val FileName = "config.ini"
     lazy val SourceSection = "sources"
     lazy val SourceDir = "dirs"
+    lazy val DbSection = "db"
+    lazy val DbDir = "dir"
   }
 
   def osNotSupported = throw new RuntimeException(
