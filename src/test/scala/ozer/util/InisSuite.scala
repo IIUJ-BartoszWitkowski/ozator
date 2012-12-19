@@ -20,10 +20,16 @@ class InisSuite extends FunSuite {
     val fileName = "test.ini"
 
     Inis.toFile(givenIni, fileName)
-
-    val readIni = Inis.fromFile(fileName)
-
-    //println(readIni)
-    assert(givenIni == readIni)
+    try {
+      val readIni = Inis.fromFile(fileName)
+      assert(givenIni == readIni)
+    } finally {
+      try {
+        import java.io.File
+        val file = new File(fileName).delete
+      } catch {
+        case _ =>
+      }
+    }
   }
 }

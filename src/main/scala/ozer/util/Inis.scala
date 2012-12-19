@@ -40,6 +40,8 @@ object Inis {
   }
 
   def toFile(ini: Ini, file: File): Unit = {
+    if (!file.exists) file.createNewFile
+
     val jIni = new JIni(file)
     jIni.clear()
 

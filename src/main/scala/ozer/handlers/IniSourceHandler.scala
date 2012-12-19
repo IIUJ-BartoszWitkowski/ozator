@@ -77,20 +77,19 @@ class IniSourceHandler(
 
   private val areSame = fileSystemHandler.areSame(_, _)
 
-  def list(): Unit = {
+  def printList(): Unit = {
     PureSourceHandler.list(ini).foreach { line =>
       screenHandler.println(line)
     }
   }
   
-  private[this] def writeSources(newSources: List[String]) = {
-    val key = Config.SourceDir
-    val config = ini
-    val section: Map[String, List[String]] = config.getOrElse(Config.SourceSection, Map.empty)
-    val newConfig = config.updated(Config.SourceSection, section.updated(key, newSources))
-    write(newConfig)
+  def list(): List[String] = {
+     PureSourceHandler.list(ini)
   }
-
+  
+  private[this] def writeSources(newSources: List[String]) = {
+    write(Config.SourceSection, Config.SourceDir, newSources)
+  }
 
   def add(files: List[String]) {
     val sources = PureSourceHandler.list(ini)

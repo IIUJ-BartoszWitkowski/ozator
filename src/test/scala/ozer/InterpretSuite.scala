@@ -26,6 +26,22 @@ class InterpretSuite extends FunSuite {
     }
   }
 
+  class MockDbHandler extends DbHandler {
+    var created = List.empty[String]
+    var nUpdated = 0
+    var nStatus = 0
+
+    def create(dir: String): Unit = {
+      created ::= dir
+    }
+    def update(): Unit = {
+      nUpdated += 1
+    }
+    def status(): Unit = {
+      nStatus += 1
+    }
+  }
+
   object MockSourceHandler {
     def apply(sources: List[String] = List.empty, 
        added: List[String] = List.empty,
@@ -37,6 +53,7 @@ class InterpretSuite extends FunSuite {
         added ++= toAdd
         removed ++= toRemove
         def list = sources
+        def printList {} 
       }
     }
 
@@ -69,6 +86,7 @@ class InterpretSuite extends FunSuite {
       val interpret = new Interpret {
         override val sourceHandler = mockSourceHandler
         override val screenHandler = mockScreenHandler
+        override val dbHandler = null
       }
 
       interpret(Source.Add(given))
@@ -88,6 +106,7 @@ class InterpretSuite extends FunSuite {
       val interpret = new Interpret {
         override val sourceHandler = mockSourceHandler
         override val screenHandler = mockScreenHandler
+        override val dbHandler = null
       }
 
       interpret(Source.Rm(given))
