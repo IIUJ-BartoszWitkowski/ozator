@@ -38,7 +38,8 @@ class DbHandlerImpl(
 
   def dir(): Option[String] = PureDbHandler.dir(ini)
 
-  def create(dirName: String): Unit = {
+  def create(dirNameRelative: String): Unit = {
+    val dirName = fileSystemHandler.expand(dirNameRelative) 
     val exists = fileSystemHandler.exists(dirName)
     val (canCreate, warning) = PureDbHandler.canCreate(dir, exists)
 

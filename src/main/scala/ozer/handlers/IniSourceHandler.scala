@@ -91,7 +91,8 @@ class IniSourceHandler(
     write(Config.SourceSection, Config.SourceDir, newSources)
   }
 
-  def add(files: List[String]) {
+  def add(filesNotExpaned: List[String]) {
+    val files = filesNotExpaned.map(fileSystemHandler.expand(_))
     val sources = PureSourceHandler.list(ini)
     val valid = fileSystemHandler.exists(_)
     val (newSources, warnings) = PureSourceHandler.add(sources, files, areSame, valid)
@@ -100,7 +101,8 @@ class IniSourceHandler(
     writeSources(newSources)
   }
 
-  def remove(files: List[String]) {
+  def remove(filesNotExpanded: List[String]) {
+    val files = filesNotExpanded.map(fileSystemHandler.expand(_))
     val sources = PureSourceHandler.list(ini)
     val (newSources, warnings) = PureSourceHandler.remove(sources, files, areSame)
 
