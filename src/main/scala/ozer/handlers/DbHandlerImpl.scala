@@ -36,11 +36,11 @@ class DbHandlerImpl(
     write(Config.DbSection, Config.DbDir, List(dir))
   }
 
-  def ozerDb(): Option[String] = PureDbHandler.ozerDb(ini)
+  override def ozerDb(): Option[String] = PureDbHandler.ozerDb(ini)
   def allDir(): Option[String] = ozerDb() map {
     _ +  fileSystemHandler.separator + Directories.All
   }
-  def wasDbCreated = ozerDb.isDefined
+  def wasDbCreated() = ozerDb().isDefined
 
   def create(dirNameRelative: String): Unit = {
     val dirName = fileSystemHandler.expand(dirNameRelative) 
@@ -101,7 +101,7 @@ class DbHandlerImpl(
 
   def update(): Unit = {
     if (!wasDbCreated) {
-      screenHandler.println("Error - db not created (use `ozer db create DIR` to create ozer db)")
+      screenHandler.println(Errors.OzerDbNotSetUp)
       return 
     }
 
@@ -130,7 +130,7 @@ class DbHandlerImpl(
     }
   }
 
-  def exists(pathRelative: String): Boolean = {
+  def get(pathRelative: String): Boolean = {
     if (!wasDbCreated) {
       return false
     }
@@ -138,6 +138,24 @@ class DbHandlerImpl(
     val path = fileSystemHandler.expand(pathRelative) 
     val fileName = fileSystemHandler.basename(pathRelative)
     val potentialLink = allDir().get + fileSystemHandler.separator + fileName
+    
+    fileSystemHandler.areSame(path, potentialLink)
+  }
+
+  def getDbPath(nameRelative: String): String = {
+    assert(wasDbCreated())
+
+    val fileName = fileSystemHandler.basename(nameRelative)
+    allDir().get + fileSystemHandler.separator + fileName
+  }
+
+  def exists(pathRelative: String): Boolean = {
+    if (!wasDbCreated) {
+      return false
+    }
+
+    val path = fileSystemHandler.expand(pathRelative) 
+    val potentialLink = getDbPath(pathRelative)
     
     fileSystemHandler.areSame(path, potentialLink)
   }
