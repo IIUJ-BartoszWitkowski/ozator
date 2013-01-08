@@ -33,6 +33,11 @@ trait DbHandler {
   def create(dir: String): Unit
   def update(): Unit
   def status(): Unit
+  def exists(path: String): Boolean
+}
+
+trait TagHandler {
+  def addTagToFile(tagCathegory: String, tagValue: String, file: String)
 }
 
 trait HasIniConfig extends Globals {
@@ -103,7 +108,7 @@ object UnpureHandlers {
     def link(target: SanitizedPath, linkName: String): Boolean = {
       if (target.isDefined) {
         val command = Seq("ln", "-s", target.get, linkName)
-        println(command)
+        //println(command)
         val returnValue = command.!
         (returnValue == 0)
       } else {
