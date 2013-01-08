@@ -11,18 +11,18 @@ import ozer.util.Inis.Ini
 class PureDbHandlerSuite extends FunSuite with Globals {
   test("dir - without section gives None") {
     val config = Map.empty[String, Map[String, List[String]]]
-    assert(PureDbHandler.dir(config) == None)
+    assert(PureDbHandler.ozerDb(config) == None)
   }
 
   test("dir - without empty section gives None") {
     val config = Map(Config.DbSection -> Map.empty[String, List[String]])
-    assert(PureDbHandler.dir(config) == None)
+    assert(PureDbHandler.ozerDb(config) == None)
   }
 
   test("dir - happy path") {
     val config: Ini = Map(
       Config.DbSection -> Map(
         Config.DbDir -> List("db-dir")))
-    assert(PureDbHandler.dir(config) == Some("db-dir"))
+    assert(PureDbHandler.ozerDb(config) == Some("db-dir"))
   }
 }

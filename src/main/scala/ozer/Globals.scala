@@ -33,6 +33,11 @@ trait Globals {
     lazy val DbDir = "dir"
   }
 
+  object Directories {
+    lazy val All = "all"
+    lazy val Tags = "by-tag"
+  }
+
   def osNotSupported = throw new RuntimeException(
     "os " + System.getProperty("os.name") + " not supported")
 }

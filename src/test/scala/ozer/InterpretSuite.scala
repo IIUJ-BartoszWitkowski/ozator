@@ -40,6 +40,7 @@ class InterpretSuite extends FunSuite {
     def status(): Unit = {
       nStatus += 1
     }
+    def exists(path: String): Boolean = true
   }
 
   object MockSourceHandler {
