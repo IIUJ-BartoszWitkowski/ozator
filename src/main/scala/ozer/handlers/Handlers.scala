@@ -108,7 +108,6 @@ object UnpureHandlers {
     def link(target: SanitizedPath, linkName: String): Boolean = {
       if (target.isDefined) {
         val command = Seq("ln", "-s", target.get, linkName)
-        //println(command)
         val returnValue = command.!
         (returnValue == 0)
       } else {
