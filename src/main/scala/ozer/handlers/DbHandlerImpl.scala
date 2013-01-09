@@ -37,12 +37,12 @@ class DbHandlerImpl(
   }
 
   override def ozerDb(): Option[String] = PureDbHandler.ozerDb(ini)
-  def allDir(): Option[String] = ozerDb() map {
+  override def allDir(): Option[String] = ozerDb() map {
     _ +  fileSystemHandler.separator + Directories.All
   }
   def wasDbCreated() = ozerDb().isDefined
 
-  def create(dirNameRelative: String): Unit = {
+  override def create(dirNameRelative: String): Unit = {
     val dirName = fileSystemHandler.expand(dirNameRelative) 
     val exists = fileSystemHandler.exists(dirName)
     val (canCreate, warning) = PureDbHandler.canCreate(ozerDb(), exists)
@@ -99,7 +99,7 @@ class DbHandlerImpl(
     }
   }
 
-  def update(): Unit = {
+  override def update(): Unit = {
     if (!wasDbCreated) {
       screenHandler.println(Errors.OzerDbNotSetUp)
       return 
@@ -112,7 +112,7 @@ class DbHandlerImpl(
     } link(source, item, allDir().get)
   }
   
-  def status(): Unit = {
+  override def status(): Unit = {
     if (!wasDbCreated) {
       screenHandler.println("Error - db not created (use `ozer db create DIR` to create ozer db)")
       return 
@@ -130,32 +130,29 @@ class DbHandlerImpl(
     }
   }
 
-  def get(pathRelative: String): Boolean = {
-    if (!wasDbCreated) {
-      return false
-    }
-
-    val path = fileSystemHandler.expand(pathRelative) 
-    val fileName = fileSystemHandler.basename(pathRelative)
-    val potentialLink = allDir().get + fileSystemHandler.separator + fileName
-    
-    fileSystemHandler.areSame(path, potentialLink)
-  }
-
-  def getDbPath(nameRelative: String): String = {
+  override def dbPath(nameRelative: String): String = {
     assert(wasDbCreated())
 
     val fileName = fileSystemHandler.basename(nameRelative)
     allDir().get + fileSystemHandler.separator + fileName
   }
 
-  def exists(pathRelative: String): Boolean = {
+  override def realPath(nameRelative: String): Option[String] = {
+    if (!existsInDb(nameRelative)) {
+      None
+    } else {
+      val unlinked = fileSystemHandler.readLink(dbPath(nameRelative))
+      Some(unlinked)
+    }
+  }
+
+  override def existsInDb(pathRelative: String): Boolean = {
     if (!wasDbCreated) {
       return false
     }
 
     val path = fileSystemHandler.expand(pathRelative) 
-    val potentialLink = getDbPath(pathRelative)
+    val potentialLink = dbPath(pathRelative)
     
     fileSystemHandler.areSame(path, potentialLink)
   }
