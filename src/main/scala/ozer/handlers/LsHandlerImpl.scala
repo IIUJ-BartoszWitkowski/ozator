@@ -31,8 +31,12 @@ class LsHandlerImpl(
   }
 
   override def printTagsOfFile(file: String) {
-    for ((cathegory, tag) <- tagsOfFile(file)) {
-      screenHandler.println(cathegory + " : " + tag)
+    if (dbHandler.existsInDb(file)) {
+      for ((cathegory, tag) <- tagsOfFile(file)) {
+        screenHandler.println(cathegory + " : " + tag)
+      }
+    } else {
+      screenHandler.println("Error - file '" + file + "' doesn't exist in ozer db.")
     }
   }
 }
