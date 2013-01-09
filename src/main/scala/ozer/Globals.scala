@@ -25,6 +25,13 @@ trait Globals {
     }
   }
 
+  lazy val Cache = OzerHome + File.separator + "cache"
+  lazy val GenresFile = OzerHome + File.separator + "genres.utf8"
+  lazy val RatingsFile = OzerHome + File.separator + "ratings.utf8"
+  lazy val DirectorsFile = OzerHome + File.separator + "directors.utf8"
+  lazy val ActorsFile = OzerHome + File.separator + "actors.utf8"
+  lazy val ActressesFile = OzerHome + File.separator + "actresses.utf8"
+
   object Config {
     lazy val FileName = "config.ini"
     lazy val SourceSection = "sources"
