@@ -36,7 +36,7 @@ class TagHandlerImpl(
     val dir = tagDir().get + separator + cathegoryName + separator + tagName
 
     if (!existsTag(cathegoryName, tagName)) {
-      val create = screenHandler.ynChoice("Create new tag '" + tagName + "'in cathegory '" + cathegoryName + "'?")
+      val create = screenHandler.ynChoice("Create new tag '" + tagName + "' in cathegory '" + cathegoryName + "'?")
       if (!create) return None
 
       fileSystemHandler.mkDir(dir)
@@ -46,19 +46,19 @@ class TagHandlerImpl(
   }
 
   override def addTagToFile(cathegoryName: String, tagName: String, fileRelative: String) {
-    if (!isLegal(cathegoryName)) {
+    if (isIllegal(cathegoryName)) {
       screenHandler.println("Illegal cathegory name: '" + cathegoryName + "'")
       return
     }
     
-    if (!wasDbCreated) { 
+    if (!wasDbCreated()) { 
       screenHandler.println(Errors.OzerDbNotSetUp)
       return
     }
 
     val file = fileSystemHandler.expand(fileRelative)
 
-    if (!dbHandler.exists(file)) {
+    if (!dbHandler.existsInDb(file)) {
       screenHandler.println("File: '" + file + "' can't be found in ozer data base. " +
         "Was the source directory added by `ozer source add DIR'? " +
         "Was the ozer database updated " +
@@ -76,13 +76,40 @@ class TagHandlerImpl(
     if (!tagDir.isDefined) return
 
     val name = fileSystemHandler.basename(file)
-    val targetPath = dbHandler.getDbPath(file)
-    val linkPath = cathegoryDir + separator + tagName
+    val linkPath = tagDir.get + separator + name
+
+    if (fileSystemHandler.exists(linkPath)) {
+      screenHandler.println("Error: tag '" + tagName +"' in cathegory '" + cathegoryName + "' exists " +
+        "for file: " + file)
+      return
+    }
+
+    val targetPath = dbHandler.dbPath(file)
 
     fileSystemHandler.link(targetPath, linkPath)
   }
 
-  def isLegal(name: String) = {
+  override def tagsOfFile(fileRelative: String): Seq[(String, String)] = {
+    if (wasDbCreated()) {
+      val dbPath = dbHandler.dbPath(fileRelative)
+      for {
+        cathegory <- cathegories()
+        tag <- tagsInCathegory(cathegory) 
+        fileWithTag <- fileSystemHandler.ls(dirFromCathegoryAndTag(cathegory, tag))
+        if (fileSystemHandler.areSame(fileWithTag, dbPath))
+      } yield {
+        (cathegory, tag)
+      }
+    } else {
+      List.empty[(String, String)]
+    }
+  }
+
+  def dirFromCathegoryAndTag(cathegory: String, tag: String): String = {
+    tagDir() + separator + cathegory + separator + tag
+  }
+
+  def isIllegal(name: String) = {
     name.contains("\0") || name.contains("/")
   }
   
