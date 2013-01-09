@@ -12,13 +12,17 @@ object Ozer extends Log {
     import ozer.handlers._ 
     import ozer.handlers.UnpureHandlers._ 
 
-    override lazy val sourceHandler = new IniSourceHandler(fileSystemHandler, screenHandler)
-    override lazy val screenHandler = UnpureScreenHandler
-    override lazy val dbHandler = new DbHandlerImpl(sourceHandler, screenHandler, fileSystemHandler)
-    override lazy val lsHandler = new LsHandlerImpl(screenHandler, fileSystemHandler, dbHandler, tagHandler)
-    override lazy val tagHandler = new TagHandlerImpl(screenHandler, fileSystemHandler, dbHandler)
- 
     lazy val fileSystemHandler = UnpureFilesystemHandler
+    override lazy val screenHandler = UnpureScreenHandler
+    override lazy val sourceHandler = new IniSourceHandler(fileSystemHandler, screenHandler)
+    override lazy val dbHandler = new DbHandlerImpl(sourceHandler, screenHandler, fileSystemHandler)
+    override lazy val movieHandler = new MovieHandlerImpl(screenHandler, dbHandler, fileSystemHandler)
+    override lazy val tagHandler = new TagHandlerImpl(screenHandler, fileSystemHandler, movieHandler, dbHandler)
+    override lazy val lsHandler = 
+      new LsHandlerImpl(screenHandler, fileSystemHandler, dbHandler, movieHandler, tagHandler)
+    override lazy val autotagHandler 
+      = new AutotagHandlerImpl(screenHandler, fileSystemHandler, lsHandler, movieHandler, tagHandler)
+    
   }
 
   def main(args: Array[String]) {

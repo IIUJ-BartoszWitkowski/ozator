@@ -76,6 +76,7 @@ class InterpretSuite extends FunSuite {
     }
     
     def ynChoice(message: String) = false
+    def nChoice(message: String, n: Int) = 1
   }
 
   object MockScreenHandler {
@@ -92,6 +93,7 @@ class InterpretSuite extends FunSuite {
         override val screenHandler = mockScreenHandler
         override val dbHandler = null
         override val lsHandler = null
+        override val tagHandler = null
       }
 
       interpret(Source.Add(given))
@@ -113,6 +115,7 @@ class InterpretSuite extends FunSuite {
         override val screenHandler = mockScreenHandler
         override val dbHandler = null
         override val lsHandler = null
+        override val tagHandler = null
       }
 
       interpret(Source.Rm(given))

@@ -1,6 +1,7 @@
 package ozer.handlers
 
 import ozer.Globals
+import ozer.data._
 import java.io.File
 
 trait SourceHandler {
@@ -13,6 +14,9 @@ trait SourceHandler {
 trait ScreenHandler {
   def println(message: String)
   def ynChoice(message: String): Boolean
+  def nChoice(message: String, n: Int): Int
+  def getString(message: String): String
+  def getNumeric(message: String, low: Int, hi: Int): String
 }
 
 trait FilesystemHandler {
@@ -29,6 +33,7 @@ trait FilesystemHandler {
   def link(target: String, linkName: String): Unit
   def separator: String
   def readLink(name: String): String
+  def rm(fileName: String)
 }
 
 trait DbHandler {
@@ -43,17 +48,35 @@ trait DbHandler {
   def existsInDb(path: String): Boolean
 }
 
+trait MovieHandler {
+  def createMovies(fileNames: Seq[String]): Seq[Movie] 
+  def exists(name: String): Boolean
+  def moviePath(name: String, create: Boolean = false): String
+  def listNames(): Seq[String] 
+  def listFullPath(): Seq[String] 
+}
+
+trait AutotagHandler {
+  def autotag(): Unit
+}
+
 trait TagHandler {
   def addTagToFile(cathegoryName: String, tagName: String, file: String)
   def existsCathegory(cathegoryName: String): Boolean
   def existsTag(cathegoryName: String, tagName: String): Boolean
   def cathegories(): Seq[String]
+  def tagsOfMovie(title: String): Seq[(String, String)]
   def tagsOfFile(file: String): Seq[(String, String)]
   def tagsInCathegory(cathegoryName: String): Seq[String]
+  def removeTagFromFile(cathegoryName: String, tagName: String, file: String): Unit
+  def removeAllTagsInCathegoryFromFile(cathegoryName: String, file: String): Unit
+  def addTagToMovie(cathegoryName: String, tagName: String, title: String, force: Boolean = false) 
 }
 
 trait LsHandler {
   def list(): Seq[String]
+  def listFullPath(): Seq[String] 
+  def listNotUpdated(): Seq[String] 
   def printList(): Unit
   def tagsOfFile(file: String): Seq[(String, String)]
   def printTagsOfFile(file: String)
@@ -189,6 +212,8 @@ object UnpureHandlers {
       new File(fileName).getParentFile.getAbsolutePath
 
     override def separator : String = File.separator
+
+    override def rm(fileName: String) = new File(fileName).delete
   }
 
   object UnpureScreenHandler extends ScreenHandler {
@@ -199,6 +224,36 @@ object UnpureHandlers {
       System.out.println(message)
       val line = readLine()
       line.toLowerCase == "y"
+    }
+    def nChoice(message: String, n: Int): Int = {
+      while (true) {
+        System.out.println(message)
+        val line = readLine()
+        System.out.println
+        if (!line.isEmpty && line.trim.forall(_.isDigit)) {
+          val i = line.toInt
+          if (i >= 1 && i <= n) return i
+        }
+      }
+      0
+    }
+    def getNumeric(message: String, low: Int, high: Int): String = {
+      while (true) {
+        System.out.println(message)
+        val line = readLine()
+        System.out.println
+        if (!line.isEmpty && line.trim.forall(_.isDigit)) {
+          val i = line.toInt
+          if (i >= low && i <= high) return i.toString
+        }
+      }
+      low.toString
+    }
+
+    def getString(message: String): String = {
+      System.out.println(message)
+      val line = readLine()
+      line
     }
   }
 }

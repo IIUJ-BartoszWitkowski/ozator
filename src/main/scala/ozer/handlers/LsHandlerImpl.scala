@@ -6,6 +6,7 @@ class LsHandlerImpl(
     screenHandler: ScreenHandler,
     fileSystemHandler: FilesystemHandler,
     dbHandler: DbHandler,
+    movieHandler: MovieHandler,
     tagHandler: TagHandler)
   extends LsHandler 
   with Globals {
@@ -13,6 +14,10 @@ class LsHandlerImpl(
   override def list(): Seq[String] = {
     if (dbHandler.wasDbCreated()) fileSystemHandler.ls(dbHandler.allDir().get)
     else                          List.empty[String]
+  }
+
+  override def listFullPath(): Seq[String] = {
+    list() map { dbHandler.allDir().get + fileSystemHandler.separator + _ }
   }
 
   override def printList() {
@@ -24,6 +29,17 @@ class LsHandlerImpl(
     for (item <- list()) {
       screenHandler.println(item)
     }
+  }
+
+  def listNotUpdated(): Seq[String] = {
+    val allInDb = listFullPath()
+    val allMovies = movieHandler.listFullPath() map (fileSystemHandler.readLink(_))
+
+    val notUpdated = allInDb.filter { file =>
+       !allMovies.contains(file)
+    }
+
+    notUpdated
   }
 
   override def tagsOfFile(file: String): Seq[(String, String)] = {

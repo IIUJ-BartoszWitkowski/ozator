@@ -9,6 +9,8 @@ trait Interpret {
   def dbHandler:     DbHandler
   def lsHandler:     LsHandler
   def tagHandler:    TagHandler
+  def movieHandler:  MovieHandler = null
+  def autotagHandler: AutotagHandler = null
   
   def listSources: Unit = {
     sourceHandler.printList   
@@ -50,21 +52,36 @@ trait Interpret {
     tagHandler.addTagToFile(cathegoryName, tagName, file)
   }
 
+  def removeTagFromFile(cathegoryName: String, tagName: String, file: String) {
+    tagHandler.removeTagFromFile(cathegoryName, tagName, file)
+  }
+
+  def removeAllTagsInCathegoryFromFile(cathegoryName: String, file: String) {
+    tagHandler.removeAllTagsInCathegoryFromFile(cathegoryName, file)
+  }
+
+  def autotag() {
+    autotagHandler.autotag()
+  }
+
   def unsupported(command: Command) = {
     screenHandler.println(command.toString + " not supported yet")
   }
 
   def apply(command: Command): Unit = command match {
-    case Error(message)                     => handleError(message)
-    case Source.List                        => listSources
-    case Source.Add(files)                  => addSources(files)
-    case Source.Rm(files)                   => removeSources(files)
-    case Db.Create(dir)                     => createDb(dir)
-    case Db.Update                          => updateDb()
-    case Db.Status                          => dbStatus()
-    case Ls.Everything                      => listAll()
-    case Ls.TagsOfFile(file)                => listTagsOfFile(file)
-    case Tag.AddTagToFile(key, value, name) => addTagToFile(key, value, name)
-    case cmd                                => unsupported(cmd)
+    case Error(message)                      => handleError(message)
+    case Source.List                         => listSources
+    case Source.Add(files)                   => addSources(files)
+    case Source.Rm(files)                    => removeSources(files)
+    case Db.Create(dir)                      => createDb(dir)
+    case Db.Update                           => updateDb()
+    case Db.Status                           => dbStatus()
+    case Ls.Everything                       => listAll()
+    case Ls.TagsOfFile(file)                 => listTagsOfFile(file)
+    case Tag.AddTagToFile(key, value, name)  => addTagToFile(key, value, name)
+    case Tag.RmTagFromFile(key, value, name) => removeTagFromFile(key, value, name)
+    case Tag.RmAllTagsFromFile(key, name)    => removeAllTagsInCathegoryFromFile(key, name)
+    case Tag.Auto                            => autotag()
+    case cmd                                 => unsupported(cmd)
   }
 }
