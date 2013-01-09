@@ -12,6 +12,7 @@ trait SourceHandler {
 
 trait ScreenHandler {
   def println(message: String)
+  def ynChoice(message: String): Boolean
 }
 
 trait FilesystemHandler {
@@ -30,14 +31,21 @@ trait FilesystemHandler {
 }
 
 trait DbHandler {
+  def ozerDb(): Option[String]
   def create(dir: String): Unit
   def update(): Unit
   def status(): Unit
+  def wasDbCreated(): Boolean
+  def getDbPath(name: String): String
   def exists(path: String): Boolean
 }
 
 trait TagHandler {
-  def addTagToFile(tagCathegory: String, tagValue: String, file: String)
+  def addTagToFile(cathegoryName: String, tagName: String, file: String)
+  def existsCathegory(cathegoryName: String): Boolean
+  def existsTag(cathegoryName: String, tagName: String): Boolean
+  def cathegories(): Seq[String]
+  def tagsInCathegory(cathegoryName: String): Seq[String]
 }
 
 trait HasIniConfig extends Globals {
@@ -162,10 +170,14 @@ object UnpureHandlers {
     override def separator : String = File.separator
   }
 
-
   object UnpureScreenHandler extends ScreenHandler {
     def println(message: String) = {
       System.out.println(message)
+    }
+    def ynChoice(message: String): Boolean = {
+      System.out.println(message)
+      val line = readLine()
+      line.toLowerCase == "y"
     }
   }
 }
