@@ -26,6 +26,7 @@ class InterpretSuite extends FunSuite {
     }
   }
 
+  /*
   class MockDbHandler extends DbHandler {
     var created = List.empty[String]
     var nUpdated = 0
@@ -40,7 +41,8 @@ class InterpretSuite extends FunSuite {
     def status(): Unit = {
       nStatus += 1
     }
-  }
+    def exists(path: String): Boolean = true
+  }*/
 
   object MockSourceHandler {
     def apply(sources: List[String] = List.empty, 
@@ -72,6 +74,8 @@ class InterpretSuite extends FunSuite {
     def ==(that: MockScreenHandler) = {
       this.msg = that.msg
     }
+    
+    def ynChoice(message: String) = false
   }
 
   object MockScreenHandler {

@@ -33,6 +33,16 @@ trait Globals {
     lazy val DbDir = "dir"
   }
 
+  object Directories {
+    lazy val All = "all"
+    lazy val Tags = "by-tag"
+  }
+
+  object Errors {
+    lazy val OzerDbNotSetUp = 
+      "Error - ozer database not created (use `ozer db create DIR` to create database)"
+  }
+
   def osNotSupported = throw new RuntimeException(
     "os " + System.getProperty("os.name") + " not supported")
 }

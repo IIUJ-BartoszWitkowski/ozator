@@ -36,7 +36,6 @@ final object Rm {
 final object Ls {
   case object Untagged extends Command
   case object Everything extends Command
-  case class FileName(title: String) extends Command
   case class TagsOfMovie(title: String) extends Command
   case class TagsOfFile(fileName: String) extends Command
 }
@@ -50,3 +49,9 @@ final object Move {
 case class Grep(key: String, pattern: String) extends Command
 
 case object FindDuplicates extends Command
+
+object ReadLink {
+  case class File(fileName: String) extends Command
+  case class Movie(name: String) extends Command
+}
+  

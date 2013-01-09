@@ -4,7 +4,7 @@ import ozer.Globals
 import ozer.util.Inis.Ini
 
 object PureDbHandler extends Globals {
-  def dir(config: Ini): Option[String] = {
+  def ozerDb(config: Ini): Option[String] = {
     val section = config.getOrElse(Config.DbSection, Map.empty)
     section.get(Config.DbDir).map { list => list.head }
   }
@@ -32,75 +32,92 @@ class DbHandlerImpl(
   extends DbHandler 
   with HasIniConfig {
 
-  private[this] def writeDir(dir: String) = {
+  def writeDirToConfig(dir: String) = {
     write(Config.DbSection, Config.DbDir, List(dir))
   }
 
-  def dir(): Option[String] = PureDbHandler.dir(ini)
+  override def ozerDb(): Option[String] = PureDbHandler.ozerDb(ini)
+  override def allDir(): Option[String] = ozerDb() map {
+    _ +  fileSystemHandler.separator + Directories.All
+  }
+  def wasDbCreated() = ozerDb().isDefined
 
-  def create(dirNameRelative: String): Unit = {
+  override def create(dirNameRelative: String): Unit = {
     val dirName = fileSystemHandler.expand(dirNameRelative) 
     val exists = fileSystemHandler.exists(dirName)
-    val (canCreate, warning) = PureDbHandler.canCreate(dir, exists)
+    val (canCreate, warning) = PureDbHandler.canCreate(ozerDb(), exists)
 
     if (canCreate) {
       fileSystemHandler.mkDir(dirName)
+      val allDir = dirName +  fileSystemHandler.separator + Directories.All
+      fileSystemHandler.mkDir(allDir)
+
       val sources = sourceHandler.list()
 
       for {
         source <- sources
         item <- fileSystemHandler.ls(source)
       } {
-        val linkPath = dirName + fileSystemHandler.separator + fileSystemHandler.basename(item)
+        val linkPath = allDir + fileSystemHandler.separator + fileSystemHandler.basename(item)
         val itemPath = source + fileSystemHandler.separator + item
         fileSystemHandler.link(itemPath, linkPath)
       }
 
-      writeDir(dirName)
+      writeDirToConfig(dirName)
     } else {
       screenHandler.println(warning.get)
     }
   }
   
-  private[this] def link(source: String, item: String, dirName: String): Unit = {
+  def link(source: String, item: String, dirName: String): Unit = {
     val linkPath = dirName + fileSystemHandler.separator + fileSystemHandler.basename(item)
     val itemPath = source + fileSystemHandler.separator + item
     fileSystemHandler.link(itemPath, linkPath)
   }
 
-  def listNotUpdated: List[(String, String)] = {
-    def contains(dir: String, item: String): Boolean = {
-      val links = fileSystemHandler.ls(dir)
-      links.foreach { link =>
-        val linkPath = dir + fileSystemHandler.separator + link
+  def contains(dir: String, item: String): Boolean = {
+    val links = fileSystemHandler.ls(dir)
+    links.foreach { link =>
+      val linkPath = dir + fileSystemHandler.separator + link
         if (fileSystemHandler.areSame(item, linkPath)) return true
-      }
-
-      false
     }
 
-    if (dir.isDefined) {
+    false
+  }
+
+  def listNotUpdated: List[(String, String)] = {
+    if (allDir().isDefined) {
       val sources = sourceHandler.list()
 
       for {
         source <- sources
         item <- fileSystemHandler.ls(source)
-        if (!contains(dir.get, source + fileSystemHandler.separator + item))
+        if (!contains(allDir().get, source + fileSystemHandler.separator + item))
       } yield (source, item)
     } else {
       List.empty[(String, String)]
     }
   }
 
-  def update(): Unit = {
+  override def update(): Unit = {
+    if (!wasDbCreated) {
+      screenHandler.println(Errors.OzerDbNotSetUp)
+      return 
+    }
+
     val notUpdated = listNotUpdated
 
     for {
       (source, item) <- listNotUpdated
-    } link(source, item, dir.get)
+    } link(source, item, allDir().get)
   }
   
-  def status(): Unit = {
+  override def status(): Unit = {
+    if (!wasDbCreated) {
+      screenHandler.println("Error - db not created (use `ozer db create DIR` to create ozer db)")
+      return 
+    }
+
     val groupedBySources = listNotUpdated.groupBy(_._1)
     for {
       (source, notUpdated) <- groupedBySources
@@ -111,5 +128,32 @@ class DbHandlerImpl(
         screenHandler.println("\t" + i)
       }
     }
+  }
+
+  override def dbPath(nameRelative: String): String = {
+    assert(wasDbCreated())
+
+    val fileName = fileSystemHandler.basename(nameRelative)
+    allDir().get + fileSystemHandler.separator + fileName
+  }
+
+  override def realPath(nameRelative: String): Option[String] = {
+    if (!existsInDb(nameRelative)) {
+      None
+    } else {
+      val unlinked = fileSystemHandler.readLink(dbPath(nameRelative))
+      Some(unlinked)
+    }
+  }
+
+  override def existsInDb(pathRelative: String): Boolean = {
+    if (!wasDbCreated) {
+      return false
+    }
+
+    val path = fileSystemHandler.expand(pathRelative) 
+    val potentialLink = dbPath(pathRelative)
+    
+    fileSystemHandler.areSame(path, potentialLink)
   }
 }
