@@ -96,8 +96,6 @@ class Parser extends RegexParsers {
     def tagHelp = list(
       syntax("tag TITLE"),
       syntax("tag -- FILE"))
-    def fileNameHelp = syntax("-L FILE")
-  
 
     def apply() = list(
       syntax(""),
@@ -117,6 +115,12 @@ class Parser extends RegexParsers {
     def apply() = syntax("")
   }
 
+  object ReadLinkHelp extends Help {
+    override val name = "readlink"
+
+    def apply() = syntax("FILE")
+  }
+
   object CommandHelp extends Pretty {
     def apply() = list(
       SourceHelp(),
@@ -129,7 +133,8 @@ class Parser extends RegexParsers {
       MoveAllHelp(),
       LsHelp(),
       GrepHelp(),
-      FindDuplicatesHelp())
+      FindDuplicatesHelp(),
+      ReadLinkHelp())
   }
     
   /*
@@ -146,18 +151,19 @@ class Parser extends RegexParsers {
   | ls 
   | grep
   | find_duplicates 
+  | readlink
   | anything ^^ { case _ => OzerError(CommandHelp()) }
   )
 
   def source: Parser[Command] = (
-      arg("source") ~> arg("ls") ~> anything             ^^ { case _ => OzerError(SourceHelp.listHelp) }
-    | arg("source") ~> arg("ls")                         ^^ { case _ => Source.List                    }
-    | arg("source") ~> (arg("add") ~> rep1(arg(string))) ^^ { case files => Source.Add(files)          }
-    | arg("source") ~> arg("add")                        ^^ { case _ => OzerError(SourceHelp.addHelp)  } 
-    | arg("source") ~> (arg("rm") ~> rep1(arg(string)))  ^^ { case files => Source.Rm(files)           }
-    | arg("source") ~> arg("rm")                         ^^ { case _ => OzerError(SourceHelp.rmHelp)   }
-    | arg("source") ~> anything                          ^^ { case _ => OzerError(SourceHelp())        }
-    | arg("source")                                      ^^ { case _ => OzerError(SourceHelp())        }
+    arg("source") ~> arg("ls") ~> anything             ^^ { case _ => OzerError(SourceHelp.listHelp) }
+  | arg("source") ~> arg("ls")                         ^^ { case _ => Source.List                    }
+  | arg("source") ~> (arg("add") ~> rep1(arg(string))) ^^ { case files => Source.Add(files)          }
+  | arg("source") ~> arg("add")                        ^^ { case _ => OzerError(SourceHelp.addHelp)  } 
+  | arg("source") ~> (arg("rm") ~> rep1(arg(string)))  ^^ { case files => Source.Rm(files)           }
+  | arg("source") ~> arg("rm")                         ^^ { case _ => OzerError(SourceHelp.rmHelp)   }
+  | arg("source") ~> anything                          ^^ { case _ => OzerError(SourceHelp())        }
+  | arg("source")                                      ^^ { case _ => OzerError(SourceHelp())        }
   ) 
   
   def db: Parser[Command] = (
@@ -261,12 +267,14 @@ class Parser extends RegexParsers {
   | arg("ls") ~> arg("tag") ~> (arg("--") ~> arg(string))           ^^ { case fileName => Ls.TagsOfFile(fileName) }
   | arg("ls") ~> arg("tag") ~> arg(string) ~> anything              ^^ { case _ => OzerError(LsHelp.tagHelp)      }
   | arg("ls") ~> arg("tag") ~> arg(string)                          ^^ { case title => Ls.TagsOfMovie(title)      }
-  | arg("ls") ~> arg("-L") ~> arg(string) ~> anything               ^^ { case _ => OzerError(LsHelp.fileNameHelp) }
-  | arg("ls") ~> arg("-L") ~> arg(string)                           ^^ { case title => Ls.FileName(title)         }
   | arg("ls") ~> anything                                           ^^ { case _ => OzerError(LsHelp())            }
   | arg("ls")                                                       ^^ { case _ => Ls.Everything                  }
   )
 
+  def readlink: Parser[Command] = (
+    arg("readlink") ~> arg(string) ~> anything ^^ { case _ => OzerError(ReadLinkHelp()) }
+  | arg("readlink") ~> arg(string)             ^^ { case file => ReadLink.File(file)    }
+  )
 
   def grep: Parser[Command] = (
     arg("grep") ~> arg(string) ~ arg(string) ~ anything ^^ { case _ => OzerError(GrepHelp())          }
@@ -308,7 +316,7 @@ class Parser extends RegexParsers {
 }
 
 object Parse extends Parser {
-  def apply(arguments: Seq[String]): Command = {
-    parseArguments(arguments)
-  }
+  def apply(arguments: Seq[String]): Command = 
+    if (arguments.isEmpty) OzerError(CommandHelp())
+    else                   parseArguments(arguments)
 }

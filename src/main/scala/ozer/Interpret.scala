@@ -7,6 +7,8 @@ trait Interpret {
   def sourceHandler: SourceHandler
   def screenHandler: ScreenHandler
   def dbHandler:     DbHandler
+  def lsHandler:     LsHandler
+  def tagHandler:    TagHandler
   
   def listSources: Unit = {
     sourceHandler.printList   
@@ -36,18 +38,33 @@ trait Interpret {
     dbHandler.status
   }
 
+  def listAll() {
+    lsHandler.printList()
+  }
+
+  def listTagsOfFile(file: String) {
+    lsHandler.printTagsOfFile(file)
+  }
+
+  def addTagToFile(cathegoryName: String, tagName: String, file: String) {
+    tagHandler.addTagToFile(cathegoryName, tagName, file)
+  }
+
   def unsupported(command: Command) = {
     screenHandler.println(command.toString + " not supported yet")
   }
 
   def apply(command: Command): Unit = command match {
-    case Error(message)    => handleError(message)
-    case Source.List       => listSources
-    case Source.Add(files) => addSources(files)
-    case Source.Rm(files)  => removeSources(files)
-    case Db.Create(dir)    => createDb(dir)
-    case Db.Update         => updateDb()
-    case Db.Status         => dbStatus()
-    case cmd               => unsupported(cmd)
+    case Error(message)                     => handleError(message)
+    case Source.List                        => listSources
+    case Source.Add(files)                  => addSources(files)
+    case Source.Rm(files)                   => removeSources(files)
+    case Db.Create(dir)                     => createDb(dir)
+    case Db.Update                          => updateDb()
+    case Db.Status                          => dbStatus()
+    case Ls.Everything                      => listAll()
+    case Ls.TagsOfFile(file)                => listTagsOfFile(file)
+    case Tag.AddTagToFile(key, value, name) => addTagToFile(key, value, name)
+    case cmd                                => unsupported(cmd)
   }
 }
