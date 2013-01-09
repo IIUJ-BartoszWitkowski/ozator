@@ -28,16 +28,19 @@ trait FilesystemHandler {
   def dirname(fileName: String): String
   def link(target: String, linkName: String): Unit
   def separator: String
+  def readLink(name: String): String
 }
 
 trait DbHandler {
   def ozerDb(): Option[String]
+  def allDir(): Option[String]
   def create(dir: String): Unit
   def update(): Unit
   def status(): Unit
   def wasDbCreated(): Boolean
-  def getDbPath(name: String): String
-  def exists(path: String): Boolean
+  def dbPath(name: String): String
+  def realPath(name: String): Option[String]
+  def existsInDb(path: String): Boolean
 }
 
 trait TagHandler {
@@ -45,7 +48,15 @@ trait TagHandler {
   def existsCathegory(cathegoryName: String): Boolean
   def existsTag(cathegoryName: String, tagName: String): Boolean
   def cathegories(): Seq[String]
+  def tagsOfFile(file: String): Seq[(String, String)]
   def tagsInCathegory(cathegoryName: String): Seq[String]
+}
+
+trait LsHandler {
+  def list(): Seq[String]
+  def printList(): Unit
+  def tagsOfFile(file: String): Seq[(String, String)]
+  def printTagsOfFile(file: String)
 }
 
 trait HasIniConfig extends Globals {
@@ -99,6 +110,11 @@ object UnpureHandlers {
 
     def isSymlink(path: String): Boolean = {
       isSymlink(sanitize(path))  
+    }
+    
+    def readLink(name: String): String = {
+      val result = Seq("readlink", name).!!
+      result.trim
     }
 
     private[this] def areSame(left: SanitizedPath, right: SanitizedPath) = {
@@ -160,7 +176,12 @@ object UnpureHandlers {
         "Couldn't create directory: '" + dirName + "'.")
     }
 
-    override def ls(dirName: String) = new File(dirName).list
+    override def ls(dirName: String) = {
+      val list = new File(dirName).list
+
+      if (list == null) List.empty[String]
+      else              list
+    }
 
     override def basename(fileName: String) = new File(fileName).getName
 

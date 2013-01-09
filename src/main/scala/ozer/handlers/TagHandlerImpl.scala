@@ -92,21 +92,21 @@ class TagHandlerImpl(
   override def tagsOfFile(fileRelative: String): Seq[(String, String)] = {
     if (wasDbCreated()) {
       val dbPath = dbHandler.dbPath(fileRelative)
+
       for {
         cathegory <- cathegories()
         tag <- tagsInCathegory(cathegory) 
-        fileWithTag <- fileSystemHandler.ls(dirFromCathegoryAndTag(cathegory, tag))
-        if (fileSystemHandler.areSame(fileWithTag, dbPath))
-      } yield {
-        (cathegory, tag)
-      }
+        dir = dirFromCathegoryAndTag(cathegory, tag)
+        fileName <- fileSystemHandler.ls(dir)
+        if (fileSystemHandler.areSame(dir + separator + fileName, dbPath))
+      } yield (cathegory, tag)
     } else {
       List.empty[(String, String)]
     }
   }
 
   def dirFromCathegoryAndTag(cathegory: String, tag: String): String = {
-    tagDir() + separator + cathegory + separator + tag
+    tagDir().get + separator + cathegory + separator + tag
   }
 
   def isIllegal(name: String) = {

@@ -75,11 +75,14 @@ class DbHandlerImpl(
     fileSystemHandler.link(itemPath, linkPath)
   }
 
-  def contains(dir: String, item: String): Boolean = {
-    val links = fileSystemHandler.ls(dir)
-    links.foreach { link =>
-      val linkPath = dir + fileSystemHandler.separator + link
-        if (fileSystemHandler.areSame(item, linkPath)) return true
+  def contains(item: String): Boolean = {
+    if (wasDbCreated()) {
+      val dir = allDir().get
+      val links = fileSystemHandler.ls(dir)
+      links.foreach { link =>
+        val linkPath = dir + fileSystemHandler.separator + link
+          if (fileSystemHandler.areSame(item, linkPath)) return true
+      }
     }
 
     false
@@ -92,7 +95,7 @@ class DbHandlerImpl(
       for {
         source <- sources
         item <- fileSystemHandler.ls(source)
-        if (!contains(allDir().get, source + fileSystemHandler.separator + item))
+        if (!contains(source + fileSystemHandler.separator + item))
       } yield (source, item)
     } else {
       List.empty[(String, String)]
