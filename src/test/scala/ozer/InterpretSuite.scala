@@ -91,6 +91,7 @@ class InterpretSuite extends FunSuite {
         override val sourceHandler = mockSourceHandler
         override val screenHandler = mockScreenHandler
         override val dbHandler = null
+        override val lsHandler = null
       }
 
       interpret(Source.Add(given))
@@ -111,6 +112,7 @@ class InterpretSuite extends FunSuite {
         override val sourceHandler = mockSourceHandler
         override val screenHandler = mockScreenHandler
         override val dbHandler = null
+        override val lsHandler = null
       }
 
       interpret(Source.Rm(given))

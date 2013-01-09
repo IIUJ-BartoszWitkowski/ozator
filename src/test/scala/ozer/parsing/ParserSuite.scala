@@ -219,16 +219,6 @@ class ParserSuite extends FunSuite {
     assert(parser.parseArguments(args) == Error(parser.LsHelp.untaggedHelp))
   }
 
-  test("ls -L file") {
-    val args = List("ls", "-L", "title")
-    assert(parser.parseArguments(args) == Ls.FileName("title"))
-  }
-
-  test("ls -L file ?") {
-    val args = List("ls", "-L", "title", "any")
-    assert(parser.parseArguments(args) == Error(parser.LsHelp.fileNameHelp))
-  }
-
   test("ls tag title") {
     val args = List("ls", "tag", "title")
     assert(parser.parseArguments(args) == Ls.TagsOfMovie("title"))
@@ -336,6 +326,16 @@ class ParserSuite extends FunSuite {
 
   test("xyzzy") {
      assert(parser.parseArguments(List("xyzzy")) == Error(parser.CommandHelp()))
+  }
+
+  test("readlink file") {
+    val args = List("readlink", "title")
+    assert(parser.parseArguments(args) == ReadLink.File("title"))
+  }
+
+  test("readlink file ?") {
+    val args = List("readlink", "title", "any")
+    assert(parser.parseArguments(args) == Error(parser.ReadLinkHelp()))
   }
 
   def assertp(s: String) = println(s)
