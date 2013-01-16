@@ -65,6 +65,8 @@ trait TagHandler {
   def existsCathegory(cathegoryName: String): Boolean
   def existsTag(cathegoryName: String, tagName: String): Boolean
   def cathegories(): Seq[String]
+  def dirFromCathegory(cathegoryName: String): String
+  def dirFromCathegoryAndTag(cathegoryName: String, tag: String): String
   def tagsOfMovie(title: String): Seq[(String, String)]
   def tagsOfFile(file: String): Seq[(String, String)]
   def tagsInCathegory(cathegoryName: String): Seq[String]
@@ -76,10 +78,17 @@ trait TagHandler {
 trait LsHandler {
   def list(): Seq[String]
   def listFullPath(): Seq[String] 
+  def listCathegories(): Seq[String]
+  def printCathegories(): Unit
   def listNotUpdated(): Seq[String] 
   def printList(): Unit
   def tagsOfFile(file: String): Seq[(String, String)]
   def printTagsOfFile(file: String)
+}
+
+trait GrepHandler {
+  def print(cathegoryName: String, tagPattern: String, moviePattern: String)
+  def grep(cathegoryName: String, tagPattern: String, moviePattern: String): Seq[(String, Seq[String])]
 }
 
 trait HasIniConfig extends Globals {

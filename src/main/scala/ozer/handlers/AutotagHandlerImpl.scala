@@ -16,6 +16,9 @@ class AutotagHandlerImpl(
   def autotag() {
     val fileNames = lsHandler.listNotUpdated() map { fileSystemHandler.basename(_) }
     val movies = movieHandler.createMovies(fileNames)
+
+    screenHandler.println("Creating tags - this may take a while.")
+
     movies foreach { movie =>
       val name = movie.title
 
@@ -30,8 +33,6 @@ class AutotagHandlerImpl(
       val directors = ImdbData.getDirectors(DirectorsFile, name)
       directors foreach { tagHandler.addTagToMovie("director", _, name, true) }
     }
-
-    screenHandler.println("Creating tags - this may take a while.")
 
     val names = movies.map(_.title)
     

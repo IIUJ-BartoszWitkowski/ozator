@@ -77,6 +77,8 @@ class InterpretSuite extends FunSuite {
     
     def ynChoice(message: String) = false
     def nChoice(message: String, n: Int) = 1
+    def getNumeric(message: String, low: Int, hight: Int) = "0"
+    def getString(message: String) = ""
   }
 
   object MockScreenHandler {

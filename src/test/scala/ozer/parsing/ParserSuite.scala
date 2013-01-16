@@ -184,18 +184,23 @@ class ParserSuite extends FunSuite {
     assert(parser.parseArguments(args) == Error(parser.GrepHelp()))
   }
 
-  test("grep tag # pattern?") {
+  test("grep tag # patternA patternB?") {
     val args = List("grep", "tag")
     assert(parser.parseArguments(args) == Error(parser.GrepHelp()))
   }
-
-  test("grep tag pattern") {
-    val args = List("grep", "tag", "pattern")
-    assert(parser.parseArguments(args) == Grep("tag", "pattern"))
+  
+  test("grep tag patternA # patternB?") {
+    val args = List("grep", "tag", "patternA")
+    assert(parser.parseArguments(args) == Error(parser.GrepHelp()))
   }
 
-  test("grep tag pattern ?") {
-    val args = List("grep", "tag", "pattern", "anything")
+  test("grep tag a b") {
+    val args = List("grep", "tag", "patternA", "patternB")
+    assert(parser.parseArguments(args) == Grep("tag", "patternA", "patternB"))
+  }
+
+  test("grep tag a b ?") {
+    val args = List("grep", "tag", "pattern", "pattern", "anything")
     assert(parser.parseArguments(args) == Error(parser.GrepHelp()))
   }
 

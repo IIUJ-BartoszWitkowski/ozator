@@ -209,8 +209,12 @@ class TagHandlerImpl(
     }
   }
 
-  def dirFromCathegoryAndTag(cathegory: String, tag: String): String = {
-    tagDir().get + separator + cathegory + separator + tag
+  override def dirFromCathegory(cathegory: String): String = {
+    tagDir().get + separator + cathegory 
+  }
+
+  override def dirFromCathegoryAndTag(cathegory: String, tag: String): String = {
+    dirFromCathegory(cathegory) + separator + tag
   }
 
   def isIllegal(name: String) = {

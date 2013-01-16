@@ -18,6 +18,7 @@ object Ozer extends Log {
     override lazy val dbHandler = new DbHandlerImpl(sourceHandler, screenHandler, fileSystemHandler)
     override lazy val movieHandler = new MovieHandlerImpl(screenHandler, dbHandler, fileSystemHandler)
     override lazy val tagHandler = new TagHandlerImpl(screenHandler, fileSystemHandler, movieHandler, dbHandler)
+    override lazy val grepHandler = new GrepHandlerImpl(fileSystemHandler, screenHandler, tagHandler)
     override lazy val lsHandler = 
       new LsHandlerImpl(screenHandler, fileSystemHandler, dbHandler, movieHandler, tagHandler)
     override lazy val autotagHandler 

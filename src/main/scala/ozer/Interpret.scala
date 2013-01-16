@@ -11,6 +11,7 @@ trait Interpret {
   def tagHandler:    TagHandler
   def movieHandler:  MovieHandler = null
   def autotagHandler: AutotagHandler = null
+  def grepHandler: GrepHandler = null
   
   def listSources: Unit = {
     sourceHandler.printList   
@@ -48,6 +49,10 @@ trait Interpret {
     lsHandler.printTagsOfFile(file)
   }
 
+  def listCathegories() {
+    lsHandler.printCathegories()
+  }
+
   def addTagToFile(cathegoryName: String, tagName: String, file: String) {
     tagHandler.addTagToFile(cathegoryName, tagName, file)
   }
@@ -64,6 +69,10 @@ trait Interpret {
     autotagHandler.autotag()
   }
 
+  def grep(cathegoryName: String, tagPattern: String, moviePattern: String) {
+    grepHandler.print(cathegoryName, tagPattern, moviePattern)
+  }
+  
   def unsupported(command: Command) = {
     screenHandler.println(command.toString + " not supported yet")
   }
@@ -77,7 +86,9 @@ trait Interpret {
     case Db.Update                           => updateDb()
     case Db.Status                           => dbStatus()
     case Ls.Everything                       => listAll()
+    case Ls.Cathegories                      => listCathegories()
     case Ls.TagsOfFile(file)                 => listTagsOfFile(file)
+    case Grep(cathegory, tag, movie)         => grep(cathegory, tag, movie)
     case Tag.AddTagToFile(key, value, name)  => addTagToFile(key, value, name)
     case Tag.RmTagFromFile(key, value, name) => removeTagFromFile(key, value, name)
     case Tag.RmAllTagsFromFile(key, name)    => removeAllTagsInCathegoryFromFile(key, name)

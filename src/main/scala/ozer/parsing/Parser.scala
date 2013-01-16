@@ -93,6 +93,7 @@ class Parser extends RegexParsers {
   object LsHelp extends Help {
     override val name = "ls" 
     def untaggedHelp = syntax("untagged")
+    def cathegoriesHelp = syntax("cathegories")
     def tagHelp = list(
       syntax("tag TITLE"),
       syntax("tag -- FILE"))
@@ -100,6 +101,7 @@ class Parser extends RegexParsers {
     def apply() = list(
       syntax(""),
       untaggedHelp,
+      cathegoriesHelp,
       tagHelp)
   }
 
@@ -174,6 +176,7 @@ class Parser extends RegexParsers {
   | arg("db") ~> arg("update")                            ^^ { case _ => Db.Update                    }
   | arg("db") ~> arg("status") ~> anything                ^^ { case _ => OzerError(DbHelp.statusHelp) }
   | arg("db") ~> arg("status")                            ^^ { case _ => Db.Status                    }
+  | arg("db") ~> anything                                 ^^ { case _ => OzerError(DbHelp())          }
   | arg("db")                                             ^^ { case _ => OzerError(DbHelp())          }
   )
 
@@ -261,14 +264,16 @@ class Parser extends RegexParsers {
   )
 
   def ls: Parser[Command] = (
-    arg("ls") ~ arg("untagged") ~ anything                          ^^ { case _ => OzerError(LsHelp.untaggedHelp) }
-  | arg("ls") ~ arg("untagged")                                     ^^ { case _ => Ls.Untagged                    }
-  | arg("ls") ~> arg("tag") ~> arg("--") ~> arg(string) ~> anything ^^ { case _ => OzerError(LsHelp.tagHelp)      }
-  | arg("ls") ~> arg("tag") ~> (arg("--") ~> arg(string))           ^^ { case fileName => Ls.TagsOfFile(fileName) }
-  | arg("ls") ~> arg("tag") ~> arg(string) ~> anything              ^^ { case _ => OzerError(LsHelp.tagHelp)      }
-  | arg("ls") ~> arg("tag") ~> arg(string)                          ^^ { case title => Ls.TagsOfMovie(title)      }
-  | arg("ls") ~> anything                                           ^^ { case _ => OzerError(LsHelp())            }
-  | arg("ls")                                                       ^^ { case _ => Ls.Everything                  }
+    arg("ls") ~ arg("untagged") ~ anything                          ^^ { case _ => OzerError(LsHelp.untaggedHelp)    }
+  | arg("ls") ~ arg("untagged")                                     ^^ { case _ => Ls.Untagged                       }
+  | arg("ls") ~ arg("cathegories") ~ anything                       ^^ { case _ => OzerError(LsHelp.cathegoriesHelp) }
+  | arg("ls") ~ arg("cathegories")                                  ^^ { case _ => Ls.Cathegories                    }
+  | arg("ls") ~> arg("tag") ~> arg("--") ~> arg(string) ~> anything ^^ { case _ => OzerError(LsHelp.tagHelp)         }
+  | arg("ls") ~> arg("tag") ~> (arg("--") ~> arg(string))           ^^ { case fileName => Ls.TagsOfFile(fileName)    }
+  | arg("ls") ~> arg("tag") ~> arg(string) ~> anything              ^^ { case _ => OzerError(LsHelp.tagHelp)         }
+  | arg("ls") ~> arg("tag") ~> arg(string)                          ^^ { case title => Ls.TagsOfMovie(title)         }
+  | arg("ls") ~> anything                                           ^^ { case _ => OzerError(LsHelp())               }
+  | arg("ls")                                                       ^^ { case _ => Ls.Everything                     }
   )
 
   def readlink: Parser[Command] = (
@@ -277,10 +282,10 @@ class Parser extends RegexParsers {
   )
 
   def grep: Parser[Command] = (
-    arg("grep") ~> arg(string) ~ arg(string) ~ anything ^^ { case _ => OzerError(GrepHelp())          }
-  | arg("grep") ~> arg(string) ~ arg(string)            ^^ { case key ~ pattern => Grep(key, pattern) }
-  | arg("grep") ~> anything                             ^^ { case _ => OzerError(GrepHelp())          }
-  | arg("grep")                                         ^^ { case _ => OzerError(GrepHelp())          }
+    arg("grep") ~> arg(string) ~ arg(string) ~ arg(string) ~ anything ^^ { case _ => OzerError(GrepHelp())                 }
+  | arg("grep") ~> arg(string) ~ arg(string) ~ arg(string)            ^^ { case cat ~ tag ~ movie => Grep(cat, tag, movie) }
+  | arg("grep") ~> anything                                           ^^ { case _ => OzerError(GrepHelp())                 }
+  | arg("grep")                                                       ^^ { case _ => OzerError(GrepHelp())                 }
   )
 
 

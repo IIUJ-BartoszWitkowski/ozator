@@ -31,6 +31,14 @@ class LsHandlerImpl(
     }
   }
 
+  override def listCathegories(): Seq[String] = {
+    tagHandler.cathegories
+  }
+
+  override def printCathegories() {
+    listCathegories() foreach { screenHandler.println(_) }
+  }
+
   def listNotUpdated(): Seq[String] = {
     val allInDb = listFullPath()
     val allMovies = movieHandler.listFullPath() map (fileSystemHandler.readLink(_))
